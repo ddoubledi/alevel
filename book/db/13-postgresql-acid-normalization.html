@@ -1,0 +1,288 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>13-postgresql-acid-normalization - ALevel</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../db/11-postgresql-crud.html"><strong aria-hidden="true">1.</strong> 11-postgresql-crud</a></li><li class="chapter-item expanded "><a href="../db/12-postgresql-join.html"><strong aria-hidden="true">2.</strong> 12-postgresql-join</a></li><li class="chapter-item expanded "><a href="../db/13-postgresql-acid-normalization.html" class="active"><strong aria-hidden="true">3.</strong> 13-postgresql-acid-normalization</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">ALevel</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p><a href="13-postgresql-acid-normalization.excalidraw.html">13-postgresql-acid-normalization.excalidraw</a></p>
+<h1 id="posgresql-acid-Нормальні-форми-бази-даних"><a class="header" href="#posgresql-acid-Нормальні-форми-бази-даних">PosgreSQL. ACID, Нормальні форми бази даних</a></h1>
+<h1 id="Зміст"><a class="header" href="#Зміст">Зміст</a></h1>
+<ul>
+<li><a href="#acid">ACID</a></li>
+<li><a href="#%D0%9D%D0%BE%D1%80%D0%BC%D0%B0%D0%BB%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F-%D0%B1%D0%B0%D0%B7-%D0%B4%D0%B0%D0%BD%D0%B8%D1%85">Нормалізація баз даних</a></li>
+<li><a href="#%D0%9B%D1%96%D1%82%D0%B5%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0">Література</a></li>
+</ul>
+<h2 id="acid"><a class="header" href="#acid">ACID</a></h2>
+<p><strong>ACID</strong> (англ. <em><strong>Atomicity, Consistency, Isolation, Durability</strong></em>) — це набір властивостей, що гарантують надійну роботу транзакцій бази даних: атомарність, узгодженість, ізольованість, довговічність.<br />
+В контексті баз даних, послідовність операцій з базою даних, яка задовольняє властивостям ACID, можна розглядати як одну логічну операцію над даними. Така послідовність операцій називається транзакцією. Наприклад, переказ коштів з одного банківського рахунку на інший містить численні операції, але є єдиною транзакцією.</p>
+<p>1983 року Андреа Рейтер і Тео Хардер ввели акронім ACID, ґрунтуючись на вимогах, які сформулював раніше науковець Джим Грей.<br />
+<img src="attachments/Pasted%20image%2020240403103656.png" alt="" />
+<a href="https://uk.wikipedia.org/wiki/ACID">https://uk.wikipedia.org/wiki/ACID</a></p>
+<p><strong>Вимоги</strong></p>
+<p>За Рейтером та Хардером, вимоги до цих чотирьох властивостей наступні:</p>
+<p><strong>Atomicity — Атомарність</strong><br />
+Транзакції часто містять в собі багато операцій. Атомарність гарантує, що жодна транзакція не буде виконана частково. Будуть або виконані всі операції, що беруть участь у транзакції, або не виконано жодної. Якщо протягом роботи однієї з операцій виникне помилка і операцію буде відхилено, то будуть відхилені також усі інші зміни, здійснені в межах транзакції. Система має бути атомарною у кожній ситуації, враховуючи відключення електроенергії, помилки та збої. Гарантія атомарності перешкоджає частковому оновленню бази даних, яке насправді може спричинити ще більші проблеми, аніж оновлення всієї бази в межах однієї транзакції.</p>
+<p>Прикладом атомарної транзакції є переказ грошей з рахунку на рахунок, який проходить двома операціями: зняття грошей з першого рахунку та збереження їх на другому. Виконання цих операцій в атомарній транзакції забезпечує узгодженість даних бази, тобто гроші не віднімуться та не зарахуються, якщо одна з цих двох операцій зазнає невдачі.</p>
+<p><strong>Consistency — Узгодженість</strong><br />
+Відповідно до вимоги узгодженості, система має перебувати в узгодженому, несуперечливому стані до початку дії транзакції і по її завершенню. При цьому вона може перебувати в неузгодженому стані протягом виконання транзакції, проте ця неузгодженість не буде видимою за межами транзакції завдяки іншим властивостям — атомарності та ізольованості.</p>
+<p>Таким чином, узгодженість гарантує інваріантивність бази даних: будь-які дані, записані в базу, мають відповідати усім визначеним правилам, враховуючи обмеження, каскади, тригери та будь-яку їхню комбінацію. Це запобігає пошкодженню бази даних некоректною транзакцією, але не гарантує правильність транзакції. Посилальну цілісність гарантує відношення унікального ключа до зовнішнього.</p>
+<p>Наприклад, при переведенні коштів з рахунку на рахунок, кошти можна спочатку зняти з першого рахунку, після чого нараховувати на другий. Відповідно, після зняття коштів, але до їх нарахування система перебуває в неузгодженому стані: коштів немає на жодному з рахунків. Але після завершення транзакції повна сума перебуватиме на другому (або першому у випадку скасування транзакції) рахунку.</p>
+<p><strong>Isolation — Ізольованість</strong><br />
+Ізольованість означає, що жодні проміжні зміни не будуть видимі за межами транзакції аж до її завершення. Питання ізоляції стає актуальним при одночасній роботі багатьох транзакцій з тими самими даними. За цією вимогою, якщо дві транзакції намагатимуться змінити одні й ті самі дані, то одну з них буде відхилено або призупинено до завершення другої.</p>
+<p><strong>Durability — Довговічність</strong><br />
+Довговічність гарантує, що незалежно від інших проблем після відновлення працездатності системи результати завершених транзакцій будуть збережені. Іншими словами, якщо користувач отримав повідомлення про успішне завершення транзакції, то він може бути впевнений, що дані будуть збережені та відновлені у випадку збоїв.</p>
+<h2 id="Нормалізація-баз-даних"><a class="header" href="#Нормалізація-баз-даних">Нормалізація баз даних</a></h2>
+<p><img src="attachments/Pasted%20image%2020240403103707.png" alt="" /></p>
+<p><strong>Нормалізація</strong> - це процес упорядкування даних у базі даних таким чином, щоб вона була вільна від надлишковості та залежності. Це допомагає усунути невідповідності та аномалії даних, тим самим покращуючи цілісність даних. Нормалізація - це набір правил або вказівки щодо розробки схеми бази даних таким чином, щоб уникнути дублювання даних, надмірності даних і неузгодженості даних.</p>
+<p><img src="attachments/Pasted%20image%2020240403103732.png" alt="" /></p>
+<p><a href="https://uk.wikipedia.org/wiki/%D0%9D%D0%BE%D1%80%D0%BC%D0%B0%D0%BB%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F_%D0%B1%D0%B0%D0%B7_%D0%B4%D0%B0%D0%BD%D0%B8%D1%85">Нормальні форми</a></p>
+<p>Існує кілька нормальних форм, кожна з яких будується на попередній, які скеровують нас у процесі нормалізації. Найпоширенішими звичайними формами є:</p>
+<ul>
+<li>
+<p><em>Перша нормальна форма (1NF)</em>: кожен стовпець має містити атомарні (неподільні) значення. У таблиці не повинно бути повторюваних груп або масивів даних.</p>
+</li>
+<li>
+<p><em>Друга нормальна форма (2NF):</em> кожен неключовий стовпець має функціонально залежати від усього первинного ключа. Іншими словами, кожен стовпець у таблиці має бути пов’язаний із первинним ключем, а не залежати від будь-яких інших неключових стовпців.</p>
+</li>
+<li>
+<p><em>Третя нормальна форма (3NF)</em>: усі неключові стовпці мають залежати лише від первинного ключа, а не від будь-яких інших неключових стовпців. Це усуває транзитивні залежності.</p>
+</li>
+</ul>
+<p>Нормалізація зменшує надлишковість даних і залежність, роблячи базу даних більш ефективною, гнучкою та масштабованою. Це також допомагає підтримувати узгодженість і точність даних, а також гарантує належну обробку оновлень і видалень.</p>
+<h2 id="Література"><a class="header" href="#Література">Література</a></h2>
+<ol>
+<li><a href="https://javarush.com/ua/quests/lectures/ua.questhibernate.level17.lecture02">Нормальні форми бази даних</a></li>
+<li><a href="https://edu-python-course.github.io/_build/html/uk/rdbms/normalization.html">https://edu-python-course.github.io/_build/html/uk/rdbms/normalization.html</a></li>
+<li><a href="https://rdb.dp.ua/uk/chapter_03">Нормалізація відношень при проектуванні БД</a></li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../db/12-postgresql-join.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../db/12-postgresql-join.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

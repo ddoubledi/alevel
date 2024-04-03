@@ -1,0 +1,599 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>12-postgresql-join - ALevel</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../db/11-postgresql-crud.html"><strong aria-hidden="true">1.</strong> 11-postgresql-crud</a></li><li class="chapter-item expanded "><a href="../db/12-postgresql-join.html" class="active"><strong aria-hidden="true">2.</strong> 12-postgresql-join</a></li><li class="chapter-item expanded "><a href="../db/13-postgresql-acid-normalization.html"><strong aria-hidden="true">3.</strong> 13-postgresql-acid-normalization</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">ALevel</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p><a href="12-postgresql-join.excalidraw.html">12-postgresql-join.excalidraw</a></p>
+<h1 id="posgresql-відносини-складні-запити-join"><a class="header" href="#posgresql-відносини-складні-запити-join">PosgreSQL, відносини, складні запити, JOIN</a></h1>
+<h1 id="Зміст"><a class="header" href="#Зміст">Зміст</a></h1>
+<ul>
+<li><a href="#%D0%92%D0%B8%D0%B4%D0%B8-%D0%BB%D0%BE%D0%B3%D1%96%D1%87%D0%BD%D0%BE%D0%B3%D0%BE-%D0%B7%D0%B2%D1%8F%D0%B7%D0%BA%D1%83-%D0%B2%D1%96%D0%B4%D0%BD%D0%BE%D1%88%D0%B5%D0%BD%D0%BD%D1%8F-%D0%BC%D1%96%D0%B6-%D1%82%D0%B0%D0%B1%D0%BB%D0%B8%D1%86%D1%8F%D0%BC%D0%B8">Види логічного зв’язку (відношення між таблицями)</a></li>
+<li><a href="#%D0%9E%D0%B1%D1%94%D0%B4%D0%BD%D0%B0%D0%BD%D0%BD%D1%8F-joins">Об’єднання (JOINS)</a>
+<ul>
+<li><a href="#case"><code>CASE</code></a></li>
+<li><a href="#%D0%9A%D0%BE%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%80%D1%96">Коментарі</a></li>
+</ul>
+</li>
+<li><a href="#%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0">Практика</a></li>
+<li><a href="#%D0%94%D0%BE%D0%BC%D0%B0%D1%88%D0%BD%D1%94-%D0%B7%D0%B0%D0%B2%D0%B4%D0%B0%D0%BD%D0%BD%D1%8F">Домашнє завдання:</a></li>
+<li><a href="#%D0%9B%D1%96%D1%82%D0%B5%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0-%D1%82%D0%B0-%D0%9A%D0%BE%D1%80%D0%B8%D1%81%D0%BD%D1%96-%D0%BF%D0%BE%D1%81%D0%B8%D0%BB%D0%B0%D0%BD%D0%BD%D1%8F">Література та Корисні посилання</a></li>
+</ul>
+<h2 id="Види-логічного-звязку-відношення-між-таблицями"><a class="header" href="#Види-логічного-звязку-відношення-між-таблицями">Види логічного зв’язку (відношення між таблицями)</a></h2>
+<p>Зв’язок встановлюється між двома загальними полями (стовпцями) двох таблиць.</p>
+<p>Відносини, які можуть існувати між записами двох таблиць:</p>
+<ol>
+<li><strong>One-to-one</strong> (1:1) <em><strong>один-до-одного</strong></em> — кожному запису з однієї таблиці відповідає один запис у іншій таблиці; створюється в тому випадку, коли обидва поля є ключовими або мають унікальні індекси.  <img src="attachments/Pasted%20image%2020240403102811.png" alt="" /></li>
+<li><strong>One-to-many</strong> (1:N) <em><strong>один-до-багатьох</strong></em> — кожному запису з однієї таблиці відповідає кілька записів у іншій таблиці; створюється в тому випадку, коли тільки одне з полів є полем первинного ключа або унікального індексу.  <em><strong>багато-до-одного</strong></em> — безлічі записів з однієї таблиці відповідає один запис у іншій таблиці;<img src="attachments/Pasted%20image%2020240403102852.png" alt="" /></li>
+<li><strong>Many-to-many</strong> (N:N) <em><strong>багато-до-багатьох</strong></em> — безліч записів з однієї таблиці відповідає кілька записів в іншій таблиці; фактично є двома відносинами «один-до-багатьох» з третьої таблицею, первинний ключ якої складається з полів зовнішнього ключа двох інших таблиць. <img src="attachments/Pasted%20image%2020240403102909.png" alt="" /></li>
+</ol>
+<p><img src="attachments/Pasted%20image%2020240403102919.png" alt="" /></p>
+<h2 id="Обєднання-joins"><a class="header" href="#Обєднання-joins">Об’єднання (JOINS)</a></h2>
+<p><img src="attachments/Pasted%20image%2020240403102927.png" alt="" /></p>
+<p>Запити до однієї таблиці досить рідкісні. Найчастіше запити до баз даних пишуться з метою отримати інформацію з кількох таблиць, інформація з яких поєднується за певними умовами.</p>
+<p><img src="attachments/Pasted%20image%2020240403102936.png" alt="" /></p>
+<p>Створимо таблиці авторів, книг, жанрів та таблицю зв’язків для авторів та книг (Many-to-many):</p>
+<pre><code class="language-sql">CREATE TABLE authors  
+(  
+    id SERIAL PRIMARY KEY,  
+    name VARCHAR(200) NOT NULL,  
+    year DATE         NOT NULL DEFAULT '1970-01-01'  
+);  
+  
+CREATE TABLE genres  
+(  
+    id SERIAL PRIMARY KEY,  
+    genre VARCHAR(100) NOT NULL  DEFAULT 0
+);  
+  
+CREATE TABLE books  
+(  
+    id SERIAL PRIMARY KEY,  
+    title VARCHAR(200) NOT NULL,  
+    genre_id INT          NOT NULL REFERENCES genres (id)  
+);  
+  
+  
+CREATE TABLE authors_books  
+(  
+    id SERIAL PRIMARY KEY,  
+    author_id INT NOT NULL REFERENCES authors (id),  
+    book_id INT NOT NULL REFERENCES books (id)  
+);
+</code></pre>
+<p>Далі слід заповнити таблицю даними:</p>
+<pre><code class="language-sql">INSERT INTO genres (genre) VALUES
+	('SF'),
+	('novel'),
+	('story'),
+	('horror');
+
+INSERT INTO books(title, genre_id) VALUES
+	('Майстер і Маргарита', 2),
+	('Фауст', 0),
+	('Білий клик', 3),
+	('Дюна', 1),
+	('Острів скарбів', 2),
+	('Залізна п''ята', 3),
+	('Дракон у морі', 1);
+
+INSERT INTO authors (name) VALUES
+	('Френк Герберт'),
+	('Михайло Булгаков'), 
+	('Джек Лондон'), 
+	('Йоган Ґете'), 
+	('Роберт Хайнлайн');
+
+INSERT INTO authors_books (author_id, book_id) VALUES 
+	(1, 4),
+	(1, 7),
+	(2, 1),
+	(3, 3),
+	(3, 6),
+	(4, 2);
+</code></pre>
+<p>Дані готові, тепер можна вивчати об’єднання таблиць. Почнемо ми з об’єднання двох таблиць в одному запиті:</p>
+<pre><code class="language-sql">SELECT title, genre
+FROM books
+INNER JOIN genres ON (genres.id = books.genre_id);
+
+       title         | genre
+---------------------+-------
+ Майстер і Маргарита | novel
+ Білий клик          | story
+ Дюна                | SF
+ Острів скарбів      | novel
+ Залізна п'ята       | story
+ Дракон у морі       | SF
+(6 rows)
+
+</code></pre>
+<ul>
+<li>Для відображення назви колонок на кількості рядків треба виконати команду <code>\t</code></li>
+</ul>
+<p><strong><code>INNER JOIN</code></strong> виводить записи з лівої таблиці (першої з двох таблиць, які він об’єднує), для яких знайдеться відповідний запис у правій (другій та останній у списку) таблиці. Якщо відповідності у правій таблиці немає, такий запис не виводиться. В даному випадку можна бачити, що запис про книгу “Фауст” не виводиться. Це відбувається через те, що <code>genre_id</code> цей запис дорівнює нулю, а такого жанру в таблиці жанрів немає.<br />
+Так само в результат не потрапляє жанр horror, тому що немає жодної книги з таким жанром.</p>
+<pre><code class="language-sql">SELECT title, genre
+FROM books
+LEFT JOIN genres ON (genres.id = books.genre_id);
+
+       title         | genre
+---------------------+-------
+ Майстер і Маргарита | novel
+ Фауст               |
+ Білий клик          | story
+ Дюна                | SF
+ Острів скарбів      | novel
+ Залізна п'ята       | story
+ Дракон у морі       | SF
+(7 rows)
+
+</code></pre>
+<p><strong><code>LEFT JOIN</code></strong> виводить <strong>ВСІ</strong> записи з лівої таблиці. Для тих записів, яким знаходиться відповідність у правій, він, аналогічно <strong>INNER JOIN</strong>, виведе відповідні дані з другої таблиці. Для тих, яким відповідності не знайшлося, він нічого не виведе в стовпцях правої таблиці, залишивши їх порожніми.</p>
+<p>Щоб визначити, яким книгам не знайдені у відповідність жанри, можна виконати запит із підзапитом:</p>
+<pre><code class="language-sql">SELECT title
+FROM books
+WHERE NOT EXISTS (
+	SELECT * 
+	FROM genres 
+	WHERE books.genre_id = genres.id
+);
+
+ title
+-------
+ Фауст
+(1 row)
+</code></pre>
+<p>Цей шлях вважається правильнішим, ніж класичний:</p>
+<pre><code class="language-sql">SELECT title, genre 
+FROM books 
+LEFT JOIN genres ON (genres.id = books.genre_id)
+WHERE genre IS NULL;
+
+
+ title| genre
+ -----+-------
+ Фауст | NULL
+(1 row)
+
+</code></pre>
+<p><strong><code>RIGHT JOIN</code></strong> надходить аналогічним чином з правою таблицею: виводить усі записи з неї, додаючи записи з лівої. Де відповідності немає, залишає в стовпцях лівої таблиці порожнечу.</p>
+<pre><code class="language-sql">SELECT title, genre
+FROM books
+RIGHT JOIN genres ON (genres.id = books.genre_id);
+
+       title         | genre
+---------------------+--------
+ Майстер і Маргарита | novel
+ Білий клик          | story
+ Дюна                | SF
+ Острів скарбів      | novel
+ NULL                | horror
+(5 rows)
+</code></pre>
+<p>Якщо у вас виникне потреба побачити всі книги та всі жанри незалежно від наявності відповідних записів в іншій таблиці, але де зв’язки є – зв’язати таблиці, можна об’єднати результати двох запитів за допомогою <code>UNION</code>:</p>
+<pre><code class="language-sql">SELECT title, genre 
+FROM books 
+LEFT JOIN genres ON (genres.id = books.genre_id) 
+UNION 
+SELECT title, genre 
+FROM books RIGHT JOIN genres ON (genres.id = books.genre_id);
+
+
+       title         | genre
+---------------------+--------
+ Фауст               | NULL
+ NULL                | horror
+ Острів скарбів      | novel
+ Білий клик          | story
+ Дюна                | SF
+ Майстер і Маргарита | novel
+(6 rows)
+</code></pre>
+<p>Аналогічного результату можна досягти і спеціальним видом об’єднань - <strong><code>FULL JOIN</code></strong>:</p>
+<pre><code class="language-sql">SELECT title, genre
+FROM books
+FULL JOIN genres ON (genres.id = books.genre_id);
+
+
+       title         | genre
+---------------------+--------
+ Майстер і Маргарита | novel
+ Фауст               | NULL
+ Білий клик          | story
+ Дюна                | SF
+ Острів скарбів      | novel
+ NULL                | horror 
+(6 rows)
+</code></pre>
+<p>Якщо поля зв’язку називаються однаково, наприклад, поле <code>id</code> у таблиці <code>genres</code> називається <code>genre_id</code>, запит можна трохи спростити. Для демонстрації перейменуємо поле та виконаємо цей запит:</p>
+<pre><code class="language-sql">ALTER TABLE genres RENAME COLUMN id TO genre_id;
+
+
+SELECT title, genre
+FROM books 
+RIGHT JOIN genres USING(genre_id);
+
+
+       title         | genre
+---------------------+--------
+ Майстер і Маргарита | novel
+ Білий клик          | story
+ Дюна                | SF
+ Острів скарбів      | novel
+ Залізна п'ята       | story
+ Дракон у морі       | SF
+                     | horror                     
+(7 rows)
+
+</code></pre>
+<h3 id="case"><a class="header" href="#case"><code>CASE</code></a></h3>
+<p>Вираз <code>CASE</code> перевіряє умови та повертає значення, коли виконується перша умова (наприклад, інструкція if-then-else). Отже, як тільки умова виконується, вона припинить читання та поверне результат. Якщо жодна умова не виконується, повертається значення в пропозиції <code>ELSE</code>.<br />
+<a href="https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-case/">Детальніше</a></p>
+<p>Якщо немає частини <code>ELSE</code> і немає умов, повертає NULL.</p>
+<p>Результат буде той же, що і у звичайного <code>RIGHT JOIN</code> запиту, але сам запит коротше.</p>
+<p><strong>Синтаксис</strong></p>
+<pre><code class="language-sql">CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    WHEN conditionN THEN resultN
+    ELSE result
+END;
+</code></pre>
+<pre><code class="language-sql">SELECT name,
+CASE 
+	WHEN COUNT(book_id) = 0 THEN 'None' 
+ELSE CAST(COUNT(book_id) as varchar)
+END as book_count
+FROM authors
+LEFT JOIN authors_books ON (authors.id = authors_books.author_id)
+GROUP BY name;
+
+       name       | book_count
+------------------+------------
+ Роберт Хайнлайн  | None
+ Михайло Булгаков | 1
+ Йоган Ґете       | 1
+ Джек Лондон      | 2
+ Френк Герберт    | 2
+(5 rows)
+
+</code></pre>
+<h3 id="Коментарі"><a class="header" href="#Коментарі">Коментарі</a></h3>
+<p><em>Коментарі</em> — це рядки тексту в коді, які допомагають усім, хто його читає, краще зрозуміти, що й навіщо робить код. Коментарі повністю ігноруються (тобто не виконуються) системами управління базами даних (СУБД).</p>
+<p><strong>Однорядкові коментарі</strong><br />
+У SQL подвійне тире <code>--</code> використовується для написання однорядкового коментаря.</p>
+<pre><code class="language-sql">-- Отримання всіх даних з таблиці Students
+SELECT *
+FROM Students;
+</code></pre>
+<p><strong>Коментарі на одному рядку з кодом</strong><br />
+Також можна писати коментарі на одному рядку із SQL-командами. Наприклад:</p>
+<pre><code class="language-sql">SELECT * -- вибираємо всі дані
+FROM Students; -- з таблиці Students
+</code></pre>
+<p><strong>Багаторядкові коментарі</strong><br />
+В SQL багаторядкові коментарі починаються з /* і закінчуються */. Наприклад:</p>
+<pre><code class="language-sql">/* Вибираємо всі дані
+з таблиці Students */
+SELECT *
+FROM Students;
+</code></pre>
+<p><strong>Коментарі всередині рядків коду</strong><br />
+Подібно до однорядкових коментарів, багаторядкові коментарі можна поміщати безпосередньо в рядки SQL-коду. Наприклад:</p>
+<pre><code class="language-sql">SELECT *
+FROM /* тут ім'я таблиці */ Students;
+</code></pre>
+<h2 id="Практика"><a class="header" href="#Практика">Практика</a></h2>
+<ol>
+<li>Об’єднати авторів із назвами книг за допомогою таблиці зв’язків</li>
+<li><a href="https://github.com/pthom/northwind_psql">https://github.com/pthom/northwind_psql</a></li>
+</ol>
+<pre><code class="language-sql">CREATE TABLE authors_books_1 (
+	id SERIAL PRIMARY KEY,
+	author_id INT NOT NULL DEFAULT 0,
+	book_id INT NOT NULL DEFAULT 0,
+	CONSTRAINT fk_books
+	 FOREIGN KEY(book_id) 
+	  REFERENCES books(id)
+	   ON DELETE CASCADE, 
+	CONSTRAINT fk_author
+	 FOREIGN KEY(author_id) 
+	  REFERENCES authors(id)
+	   ON DELETE CASCADE
+);
+</code></pre>
+<h2 id="Домашнє-завдання"><a class="header" href="#Домашнє-завдання">Домашнє завдання:</a></h2>
+<ol>
+<li>Практикуємо все, що пройдено на уроці.</li>
+<li>Переписати базу даних фільмів (із таблицями акторів, фільмів, режисерів), додавши <code>many-to-many</code> звʼязки</li>
+<li>Створити базу даних студенти-групи-викладачі-кафедри (students-groups-teachers-departments).  Заповнити даними:</li>
+</ol>
+<pre><code class="language-sql">INSERT INTO departments (name) VALUES
+('Computer Science'),
+('Mathematics'),
+('Physics');
+
+INSERT INTO teachers (first_name, last_name, department_id) VALUES
+('John', 'Doe', 1),
+('Jane', 'Smith', 2),
+('Robert', 'Johnson', 3),
+('Emily', 'Williams', 1),
+('Michael', 'Brown', 2);
+
+INSERT INTO groups (name, department_id) VALUES
+('CS50', 1),
+('Math101', 2),
+('Phys101', 3),
+('CS101', 1);
+
+INSERT INTO students (first_name, last_name, group_id) VALUES
+('Alice', 'Johnson', 1),
+('Bob', 'Smith', 2),
+('Charlie', 'Williams', 3),
+('David', 'Brown', 1),
+('Eva', 'Davis', 2),
+('Frank', 'Miller', 3),
+('Grace', 'Jones', 4),
+('Henry', 'Anderson', 1),
+('Ivy', 'Moore', 2),
+('Jack', 'Taylor', 3),
+('Kate', 'White', 4),
+('Leo', 'Martin', 1),
+('Mia', 'Young', 2),
+('Noah', 'Lee', 3),
+('Olivia', 'Harris', 4),
+('Paul', 'Clark', 1),
+('Quinn', 'Evans', 2),
+('Ryan', 'Wright', 3),
+('Sophia', 'Walker', 4),
+('Tyler', 'Hill', 1);
+</code></pre>
+<p>Зробити наступні запити:</p>
+<ol>
+<li>Вивести ім’я та прізвище студентів разом із назвами їх груп</li>
+<li>Отримати список викладачів та назви кафедр, на яких вони працюють</li>
+<li>Вивести кількість студентів у кожній групі</li>
+<li>Вивести назву кафедри, імʼя та прізвище викладача, назву групи, імʼя та прізвище студента для викладачів із прізвищем Smith, Williams та Johnson, відсортувати за групою на прізвищем студента. Застосувати JOIN для з’єднання даних з усіх чотирьох таблиць на основі відповідних зовнішніх ключів.</li>
+</ol>
+<h2 id="Література-та-Корисні-посилання"><a class="header" href="#Література-та-Корисні-посилання">Література та Корисні посилання</a></h2>
+<ol>
+<li><a href="https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-foreign-key/">Introduction to PostgreSQL Foreign Key Constraint</a></li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../db/11-postgresql-crud.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../db/13-postgresql-acid-normalization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../db/11-postgresql-crud.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../db/13-postgresql-acid-normalization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
