@@ -2,7 +2,7 @@
 # PosgreSQL. CRUD таблиць, CRUD записів.
 
 ![](attachments/Pasted%20image%2020240403093533.png)
-
+https://gist.github.com/ddoubledi/50c36b0e11602b5e5cd7b64928cd6d62
 
 # Зміст
 
