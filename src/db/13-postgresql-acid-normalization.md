@@ -60,6 +60,82 @@
 
 Нормалізація зменшує надлишковість даних і залежність, роблячи базу даних більш ефективною, гнучкою та масштабованою. Це також допомагає підтримувати узгодженість і точність даних, а також гарантує належну обробку оновлень і видалень.
 
+### Приклад нормалізації
+
+Таблиця `Sales`, яка записує дані про продажі продуктів, включаючи зайву інформацію про продукт та клієнта:
+
+```sql
+CREATE TABLE Sales (
+    SaleID INT PRIMARY KEY,
+    ProductID INT,
+    ProductName VARCHAR(50),
+    ProductCategory VARCHAR(50),
+    CustomerID INT,
+    CustomerName VARCHAR(50),
+    SaleDate DATE,
+    Quantity INT,
+    Price DECIMAL(10, 2)
+);
+
+INSERT INTO Sales VALUES
+(1, 101, 'Laptop', 'Electronics', 501, 'John Doe', '2023-01-10', 1, 1200.00),
+(2, 102, 'Smartphone', 'Electronics', 502, 'Jane Smith', '2023-01-11', 2, 800.00),
+(3, 103, 'Backpack', 'Accessories', 503, 'Alice Johnson', '2023-01-12', 1, 70.00);
+```
+
+### Нормалізація до 3NF
+
+#### 1. Створення таблиць для продуктів та клієнтів (1NF & 2NF)
+
+Спочатку видаляємо повторювану інформацію про продукти та клієнтів, створюючи окремі таблиці для них.
+
+```sql
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(50),
+    Category VARCHAR(50),
+    Price DECIMAL(10, 2)
+);
+
+INSERT INTO Products VALUES
+(101, 'Laptop', 'Electronics', 1200.00),
+(102, 'Smartphone', 'Electronics', 800.00),
+(103, 'Backpack', 'Accessories', 70.00);
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(50)
+);
+
+INSERT INTO Customers VALUES
+(501, 'John Doe'),
+(502, 'Jane Smith'),
+(503, 'Alice Johnson');
+```
+
+#### 2. Оновлення таблиці `Sales` (3NF)
+
+Далі, спрощуємо таблицю `Sales`, залишаючи лише зовнішні ключі, які посилаються на `Products` та `Customers`, усуваючи зайві дані.
+
+```sql
+ALTER TABLE Sales
+DROP COLUMN ProductName,
+DROP COLUMN ProductCategory,
+DROP COLUMN CustomerName,
+DROP COLUMN Price;
+
+-- Оновлена таблиця `Sales` тепер виглядає так:
+SELECT * FROM Sales;
+```
+
+Ця переглянута таблиця `Sales` разом з таблицями `Products` та `Customers` краще відповідає принципам 3НФ:
+
+- **Перша нормальна форма (1NF):** Кожна таблиця має первинний ключ і не зберігає повторюваних груп або масивів.
+- **Друга нормальна форма (2NF):** Усі неключові атрибути кожної таблиці повністю залежні від первинного ключа.
+- **Третя нормальна форма (3NF):** Неключові атрибути не залежать від інших неключових атрибутів.
+
+
+
 ## Література
 1.  [Нормальні форми бази даних](https://javarush.com/ua/quests/lectures/ua.questhibernate.level17.lecture02)
 2.  [https://edu-python-course.github.io/\_build/html/uk/rdbms/normalization.html](https://edu-python-course.github.io/_build/html/uk/rdbms/normalization.html)
