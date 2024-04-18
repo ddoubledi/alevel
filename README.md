@@ -1,1 +1,1 @@
-[git@github.com:ddoubledi/alevel.git](https://ddoubledi.github.io/alevel/)
+Посилання на веб-версію https://ddoubledi.github.io/alevel/
