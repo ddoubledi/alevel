@@ -14,3 +14,4 @@
 - [18-decorators](python/oop/lesson18.md)
 - [19-testing](python/oop/lesson19.md)
 - [20-solid](python/oop/lesson20.md)
+- [practice](python/oop/practice.md)
